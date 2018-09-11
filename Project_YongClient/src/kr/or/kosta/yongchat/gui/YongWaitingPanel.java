@@ -16,15 +16,18 @@ import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import kr.or.kosta.yongchat.gui.dialog.YongRoomDialog;
+import kr.or.kosta.yongchat.gui.dialog.YongRoomDialogFrame;
+
 public class YongWaitingPanel extends Panel {
 
 	// owner
 	YongMainFrame mainFrame;
-	
-	//layout
+
+	// layout
 	GridBagLayout gridBagLayout;
 	GridBagConstraints gridBagConstraints;
-	
+
 	// properties
 	public Button roomSearchB, enterB, makeB;
 	public Label searchL, roomSearchL, waitingL, participateL;
@@ -32,7 +35,10 @@ public class YongWaitingPanel extends Panel {
 	public List roomList;
 	public List waitingList;
 	public List participateList;
-	
+
+	// Component
+	YongRoomDialogFrame dialogFrame;
+
 	public YongWaitingPanel(YongMainFrame mainFrame) {
 		this.mainFrame = mainFrame;
 
@@ -51,6 +57,8 @@ public class YongWaitingPanel extends Panel {
 		waitingList = new List();
 		participateList = new List();
 
+		dialogFrame = new YongRoomDialogFrame();
+
 	}
 
 	public void init() {
@@ -65,24 +73,20 @@ public class YongWaitingPanel extends Panel {
 		southP.add(makeB);
 
 		setLayout(gridBagLayout);
-		add(new Label(" "), 0, 0, 1, 1, 0, 0);
-		add(searchL, 1, 0, 2, 1, 0, 0);
-		add(new Label(" "), 3, 0, 1, 1, 0, 0);
-		add(roomSearchTF, 4, 0, 5, 1, 0, 0);
-		add(new Label(" "), 9, 0, 1, 1, 0, 0);
-		add(roomSearchB, 10, 0, 2, 1, 0, 0);
-		add(new Label(" "), 12, 0, 1, 1, 0, 0);
-		add(new Label(" "), 13, 0, 1, 1, 0, 0);
 
-		add(waitingL, 14, 0, 5, 1, 0, 0);
-		add(roomList, 0, 1, 14, 11, 0, 0);
+		add(searchL, 0, 0, 1, 1, 0, 0);
+		add(roomSearchTF, 1, 0, 1, 1, 3, 0);
+		add(roomSearchB, 2, 0, 1, 1, 1, 0);
 
-		add(waitingList, 14, 1, 5, 5, 0, 0);
+		add(waitingL, 3, 0, 1, 1, 0, 0);
+		add(waitingList, 3, 1, 1, 1, 0, 1);
 
-		add(participateL, 14, 6, 5, 1, 0, 0);
-		add(participateList, 14, 7, 5, 5, 0, 0);
+		add(roomList, 0, 1, 3, 3, 2, 0);
 
-		add(southP, 0, 12, 19, 1, 0, 0);
+		add(participateL, 3, 2, 1, 1, 0, 0);
+		add(participateList, 3, 3, 1, 1, 0, 1);
+
+		add(southP, 0, 4, 5, 1, 1, 0);
 
 	}
 
@@ -95,7 +99,7 @@ public class YongWaitingPanel extends Panel {
 		gridBagConstraints.gridwidth = gridwidth;
 		gridBagConstraints.weightx = weightx;
 		gridBagConstraints.weighty = weighty;
-		gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+		gridBagConstraints.fill = GridBagConstraints.BOTH;
 		gridBagConstraints.insets = new Insets(5, 5, 5, 5);
 
 		gridBagLayout.setConstraints(component, gridBagConstraints);
@@ -110,6 +114,7 @@ public class YongWaitingPanel extends Panel {
 				mainFrame.changeCard("CHAT");
 			}
 		});
+
 	}
 
 }

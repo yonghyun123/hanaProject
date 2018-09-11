@@ -10,10 +10,13 @@ import javax.swing.JOptionPane;
 
 import kr.or.kosta.yongchat.common.YongProtocol;
 import kr.or.kosta.yongchat.gui.YongMainFrame;
+import kr.or.kosta.yongchat.gui.dialog.YongRoomDialogFrame;
 
 
 
 public class YongChatClient {
+	// 192.168.0.121
+	// localhost
 	public static final String SERVER = "localhost";
 	public static final int PORT = 7777;
 	
@@ -23,6 +26,7 @@ public class YongChatClient {
 	
 	private boolean running;
 	private YongMainFrame mainFrame;
+	private YongRoomDialogFrame dialogFrame;
 	
 	public YongChatClient(YongMainFrame mainFrame) {
 		 this.mainFrame = mainFrame;
@@ -90,13 +94,19 @@ public class YongChatClient {
 			case YongProtocol.CONNECT_RESULT:
 				String result = tokens[2];
 				if (result.equalsIgnoreCase("SUCCESS")) {
-					JOptionPane.showMessageDialog(null, "접속에 성공하였습니다.", "알림", JOptionPane.INFORMATION_MESSAGE);
-
-					
+					JOptionPane.showMessageDialog(null, "채팅에 세계에 오신걸 환영합니다", "알림", JOptionPane.INFORMATION_MESSAGE);
 					mainFrame.changeCard("LOBBY");
+
 				} else {
 					JOptionPane.showMessageDialog(null, "이미 사용중인 대화명입니다.\n다른 대화명을 사용하세요.", "경고", JOptionPane.ERROR_MESSAGE);
 				}  
+				break;
+				
+			case YongProtocol.ROOMLIST:
+				mainFrame.getWaitingPanel().roomList.removeAll();
+				for(int i = 2; i < tokens.length; i++){
+					mainFrame.getWaitingPanel().roomList.add(tokens[i]);
+				}
 				break;
 
 //			case YongProtocol.MULTI_CHAT:
@@ -109,6 +119,7 @@ public class YongChatClient {
 //					mainFrame.userList.add(tokens[i]);
 //				}
 //				break;
+
 			case YongProtocol.DISCONNECT:
 				mainFrame.getWaitingPanel().participateList.add("###"+nickName+"님이 퇴장###");
 				//끊어질때 기능 구현
@@ -119,10 +130,13 @@ public class YongChatClient {
 					mainFrame.getWaitingPanel().waitingList.add(tokens[i]);
 				}
 //			
-//				break;
+				break;
 //			default:
 //				break;
 		}
-		
+	}
+	
+	public void setDialogFrame(YongRoomDialogFrame dialogFrame){
+		this.dialogFrame = dialogFrame;
 	}
 }

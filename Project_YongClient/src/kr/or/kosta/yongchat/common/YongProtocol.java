@@ -2,7 +2,7 @@ package kr.or.kosta.yongchat.common;
 
 public interface YongProtocol {
 	
-	public static final String DELEMETER = ",,";
+	public static final String DELEMETER = "뛟뛠";
 	public static final int CREATE = 0;
 	public static final int CONNECT = 1000;
 	public static final int CONNECT_RESULT = 1001;
@@ -10,5 +10,6 @@ public interface YongProtocol {
 	public static final int SCERETE_CHAT = 2001;   
 	public static final int DISCONNECT = 3000; 
 	public static final int UPDATELIST = 4000;
+	public static final int ROOMLIST = 5000;
 	
 }

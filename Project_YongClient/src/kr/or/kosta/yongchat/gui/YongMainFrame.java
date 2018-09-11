@@ -5,6 +5,8 @@ import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.Panel;
 import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.Calendar;
@@ -12,6 +14,7 @@ import java.util.Calendar;
 import javax.swing.JOptionPane;
 
 import kr.or.kosta.yongchat.common.YongProtocol;
+import kr.or.kosta.yongchat.gui.dialog.YongRoomDialogFrame;
 import kr.or.kosta.yongchat.network.YongChatClient;
 
 /**
@@ -33,6 +36,7 @@ public class YongMainFrame extends Frame {
 	// properties
 	private String nickName;
 	private YongChatClient chatClient;
+	private YongRoomDialogFrame dialogFrame;
 
 	public YongMainFrame() {
 
@@ -45,6 +49,7 @@ public class YongMainFrame extends Frame {
 		waitingPanel = new YongWaitingPanel(this);
 		cardPanel = new Panel();
 		cardLayout = new CardLayout();
+		dialogFrame = new YongRoomDialogFrame();
 	}
 
 	public void init() {
@@ -71,7 +76,7 @@ public class YongMainFrame extends Frame {
 	}
 
 	public void setCenter() {
-		// Runtime.getRuntime().
+		 
 		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
 
 		int x = (dim.width - getSize().width) / 2;
@@ -87,6 +92,7 @@ public class YongMainFrame extends Frame {
 		System.exit(0);
 	}
 
+	/**이벤트 등록 메서드 */
 	public void eventRegist() {
 		addWindowListener(new WindowAdapter() {
 			@Override
@@ -94,8 +100,37 @@ public class YongMainFrame extends Frame {
 				finish();
 			}
 		});
+		
+		//방생성 버튼 누르면 방생성 frame 만들기
+		waitingPanel.makeB.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				dialogFrame.init();
+			}
+		});
+		
+		//방 생성 다이어로그 정보 서버로 보내기
+		dialogFrame.roomDialog.createB.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				sendRoomInfo();
+				dialogFrame.finish();
+				changeCard("CHAT");
+			}
+		});
 	}
-
+	
+	//방만들기 버튼 눌렀을때 -> 방 텍스트 + choice + 닉네임 보내기
+	public void sendRoomInfo(){
+		String message = dialogFrame.roomDialog.roomNameTF.getText();
+		String maxRoomCnt = dialogFrame.roomDialog.numberC.getSelectedItem();
+		if (message == null || message.trim().length() == 0) {
+			return;
+		}
+		chatClient.sendMessage(YongProtocol.CREATE + YongProtocol.DELEMETER + nickName + 
+				YongProtocol.DELEMETER + message + YongProtocol.DELEMETER + maxRoomCnt);
+	}
+	
 	//여기서 최초 연결 호출
 	public void connect() {
 		nickName = joinPanel.nickNameTF.getText();
