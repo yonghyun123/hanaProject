@@ -17,7 +17,7 @@ import kr.or.kosta.yongchat.gui.dialog.YongRoomDialogFrame;
 public class YongChatClient {
 	// 192.168.0.121
 	// localhost
-	public static final String SERVER = "localhost";
+	public static final String SERVER = "192.168.0.121";
 	public static final int PORT = 7777;
 	
 	private Socket socket;
@@ -27,6 +27,8 @@ public class YongChatClient {
 	private boolean running;
 	private YongMainFrame mainFrame;
 	private YongRoomDialogFrame dialogFrame;
+	
+	private String roomNumber;
 	
 	public YongChatClient(YongMainFrame mainFrame) {
 		 this.mainFrame = mainFrame;
@@ -105,10 +107,23 @@ public class YongChatClient {
 			case YongProtocol.ROOMLIST:
 				mainFrame.getWaitingPanel().roomList.removeAll();
 				for(int i = 2; i < tokens.length; i++){
+					roomNumber = tokens[2];
 					mainFrame.getWaitingPanel().roomList.add(tokens[i]);
 				}
 				break;
-
+			case YongProtocol.CREATE:
+				mainFrame.appendMessage("###"+nickName+"님이 입장하셨습니다.###");
+				mainFrame.getChatPanel().inUserList.add(nickName);
+				break;
+			case YongProtocol.ROOMIN:
+				mainFrame.getChatPanel().inUserList.removeAll();
+				for(int i = 3; i < tokens.length; i++){
+					System.out.println("roomIn" + tokens[i]);
+					mainFrame.getChatPanel().inUserList.add(tokens[i]);
+				}
+				mainFrame.appendMessage("###"+nickName+"님이 입장하셨습니다.###");
+				break;
+				
 //			case YongProtocol.MULTI_CHAT:
 //				String chatMessage = tokens[2];
 //				mainFrame.appendMessage("["+nickName+"]: " + chatMessage);
@@ -127,6 +142,9 @@ public class YongChatClient {
 			case YongProtocol.UPDATELIST:
 				mainFrame.getWaitingPanel().waitingList.removeAll();
 				for(int i = 2; i < tokens.length; i++) {
+					if(mainFrame.getNickName().equals(tokens[i])){
+						tokens[i] += "(나)";
+					}
 					mainFrame.getWaitingPanel().waitingList.add(tokens[i]);
 				}
 //			

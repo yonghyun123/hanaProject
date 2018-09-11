@@ -18,33 +18,33 @@ public class YongChatPanel extends Panel {
 
 	// owner
 	YongMainFrame mainFrame;
-	
-	//layout
+
+	// layout
 	GridBagLayout gridBagLayout;
 	GridBagConstraints gridBagConstraints;
-	
-	//property
-	public Button exitB, inviteB, sendB;
+
+	// property
+	public Button waitUserB, inviteB, sendB;
 	public Choice choice;
 	public TextArea messageTA;
-	public List userList;
+	public List inUserList, waitUserList;
 	public TextField sendTF;
-
-
+	public Label inUserL;
 
 	Image background;
 
 	public YongChatPanel(YongMainFrame mainFrame) {
 		this.mainFrame = mainFrame;
-		exitB = new Button("나가기");
 		inviteB = new Button("초대하기");
 		sendB = new Button("전송");
 		choice = new Choice();
 		choice.add("전체");
-		messageTA = new TextArea();
-		userList = new List();
-		sendTF = new TextField();
-
+		messageTA = new TextArea(1, 1);
+		inUserList = new List();
+		waitUserList = new List();
+		sendTF = new TextField(1);
+		inUserL = new Label("참여자");
+		waitUserB = new Button("대기방유저");
 		gridBagLayout = new GridBagLayout();
 		gridBagConstraints = new GridBagConstraints();
 
@@ -56,26 +56,21 @@ public class YongChatPanel extends Panel {
 
 	public void setContents() {
 
-		Panel rightP = new Panel();
-		rightP.add(userList);
-		add(rightP, 3, 1, 3, 3, 0, 0);
-
 		setLayout(gridBagLayout);
-		add(inviteB, 0, 0, 1, 1, 0, 0);
-		add(new Label(" "), 1, 0, 1, 1, 0, 0);
-		add(exitB, 2, 0, 1, 1, 0, 0);
 
-		// add(new Label(" "), 3,0,1,1,1,0);
-		// add(new Label(" "), 4,0,1,1,1,0);
+		add(messageTA, 0, 0, 2, 4, 2, 1);
+		add(waitUserB, 2, 0, 1, 1, 0, 0);
+		add(inviteB, 3, 0, 1, 1, 0, 0);
 
-		add(messageTA, 0, 1, 3, 3, 0, 0);
-		// add(userList,3,1,2,3,0,0);
+		add(waitUserList, 2, 1, 2, 1, 0, 1);
+
+		add(inUserL, 2, 2, 2, 1, 0, 0);
+
+		add(inUserList, 2, 3, 2, 1, 0, 1);
 
 		add(choice, 0, 4, 1, 1, 0, 0);
-		add(sendTF, 1, 4, 1, 1, 1, 0);
-		add(sendB, 2, 4, 1, 1, 0, 0);
-		add(new Label(" "), 3, 4, 1, 1, 0, 0);
-		add(new Label(" "), 4, 4, 1, 1, 0, 0);
+		add(sendTF, 1, 4, 2, 1, 0, 0);
+		add(sendB, 3, 4, 1, 1, 0, 0);
 
 	}
 
@@ -105,7 +100,7 @@ public class YongChatPanel extends Panel {
 		gridBagConstraints.gridheight = gridheight;
 		gridBagConstraints.weightx = weightx;
 		gridBagConstraints.weighty = weighty;
-		gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+		gridBagConstraints.fill = GridBagConstraints.BOTH;
 		gridBagConstraints.insets = new Insets(5, 5, 5, 5);// 여백조절
 
 		gridBagLayout.setConstraints(component, gridBagConstraints);

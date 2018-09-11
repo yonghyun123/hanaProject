@@ -49,7 +49,7 @@ public class YongRoom {
 
    @Override
    public String toString() {
-      return "뛟뛠" + String.format("%10s%10s%10s", leaderName, roomName, maxRoomCnt);
+      return "뛟뛠" + String.format("%10s%20s%20s%20s", roomNumber, leaderName, roomName, maxRoomCnt);
    }
 
 }

@@ -120,8 +120,7 @@ public class YongClient extends Thread {
          chatServer.sendAllRoom(YongProtocol.ROOMLIST + YongProtocol.DELEMETER + nickName);
          break;
 
-      
-
+ 
       default:
          break;
       }

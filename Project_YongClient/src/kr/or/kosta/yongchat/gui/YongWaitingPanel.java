@@ -31,6 +31,7 @@ public class YongWaitingPanel extends Panel {
 	// properties
 	public Button roomSearchB, enterB, makeB;
 	public Label searchL, roomSearchL, waitingL, participateL;
+	public Label roomNumL, leaderL, roomTitleL, MaxNumL;
 	public TextField roomSearchTF;
 	public List roomList;
 	public List waitingList;
@@ -50,9 +51,16 @@ public class YongWaitingPanel extends Panel {
 
 		searchL = new Label("방제목");
 		waitingL = new Label("대기인원");
+		waitingL.setAlignment(Label.RIGHT);
 		participateL = new Label("참여인원");
+		participateL.setAlignment(Label.RIGHT);
 
-		roomSearchTF = new TextField(1);
+		roomNumL = new Label("방번호");
+		leaderL = new Label("방장");
+		roomTitleL = new Label("방제목");
+		MaxNumL = new Label("최대인원");
+
+		roomSearchTF = new TextField(3);
 		roomList = new List();
 		waitingList = new List();
 		participateList = new List();
@@ -75,18 +83,24 @@ public class YongWaitingPanel extends Panel {
 		setLayout(gridBagLayout);
 
 		add(searchL, 0, 0, 1, 1, 0, 0);
-		add(roomSearchTF, 1, 0, 1, 1, 3, 0);
-		add(roomSearchB, 2, 0, 1, 1, 1, 0);
+		add(roomSearchTF, 1, 0, 3, 1, 2, 0);
 
-		add(waitingL, 3, 0, 1, 1, 0, 0);
-		add(waitingList, 3, 1, 1, 1, 0, 1);
+		add(roomSearchB, 4, 0, 1, 1, 0, 0);
 
-		add(roomList, 0, 1, 3, 3, 2, 0);
+		add(roomNumL, 0, 1, 1, 1, 1, 0);
+		add(leaderL, 1, 1, 1, 1, 1, 0);
+		add(roomTitleL, 2, 1, 1, 1, 1, 0);
+		add(MaxNumL, 3, 1, 1, 1, 1, 0);
 
-		add(participateL, 3, 2, 1, 1, 0, 0);
-		add(participateList, 3, 3, 1, 1, 0, 1);
+		add(waitingL, 4, 1, 2, 1, 0, 0);
+		add(waitingList, 4, 2, 2, 1, 1, 1);
 
-		add(southP, 0, 4, 5, 1, 1, 0);
+		add(roomList, 0, 2, 4, 3, 2, 2);
+
+		add(participateL, 4, 3, 2, 1, 0, 0);
+		add(participateList, 4, 4, 2, 1, 1, 1);
+
+		add(southP, 0, 5, 8, 1, 0, 0);
 
 	}
 

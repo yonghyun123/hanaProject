@@ -76,7 +76,7 @@ public class YongMainFrame extends Frame {
 	}
 
 	public void setCenter() {
-		 
+
 		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
 
 		int x = (dim.width - getSize().width) / 2;
@@ -92,7 +92,7 @@ public class YongMainFrame extends Frame {
 		System.exit(0);
 	}
 
-	/**이벤트 등록 메서드 */
+	/** 이벤트 등록 메서드 */
 	public void eventRegist() {
 		addWindowListener(new WindowAdapter() {
 			@Override
@@ -100,16 +100,16 @@ public class YongMainFrame extends Frame {
 				finish();
 			}
 		});
-		
-		//방생성 버튼 누르면 방생성 frame 만들기
+
+		// 방생성 버튼 누르면 방생성 frame 만들기
 		waitingPanel.makeB.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				dialogFrame.init();
 			}
 		});
-		
-		//방 생성 다이어로그 정보 서버로 보내기
+
+		// 방 생성 다이어로그 정보 서버로 보내기
 		dialogFrame.roomDialog.createB.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -118,20 +118,42 @@ public class YongMainFrame extends Frame {
 				changeCard("CHAT");
 			}
 		});
+
+		waitingPanel.enterB.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				enteredRoom();
+			}
+		});
+
 	}
 	
-	//방만들기 버튼 눌렀을때 -> 방 텍스트 + choice + 닉네임 보내기
-	public void sendRoomInfo(){
+	// 메시지 붙이기
+	public void appendMessage(String message) {
+		chatPanel.messageTA.append(message + "\n");
+	}
+
+	// 클라이언트가 방을 입장 할 때.
+	public void enteredRoom() {
+		String parseStr = waitingPanel.roomList.getSelectedItem();
+		String[] tokens = parseStr.split("\\s+");
+		System.out.println("roomNumber" + tokens[1]);
+		chatClient.sendMessage(
+				YongProtocol.ROOMIN + YongProtocol.DELEMETER + nickName + YongProtocol.DELEMETER + tokens[1]);
+	}
+
+	// 방만들기 버튼 눌렀을때 -> 방 텍스트 + choice + 닉네임 보내기
+	public void sendRoomInfo() {
 		String message = dialogFrame.roomDialog.roomNameTF.getText();
 		String maxRoomCnt = dialogFrame.roomDialog.numberC.getSelectedItem();
 		if (message == null || message.trim().length() == 0) {
 			return;
 		}
-		chatClient.sendMessage(YongProtocol.CREATE + YongProtocol.DELEMETER + nickName + 
-				YongProtocol.DELEMETER + message + YongProtocol.DELEMETER + maxRoomCnt);
+		chatClient.sendMessage(YongProtocol.CREATE + YongProtocol.DELEMETER + nickName + YongProtocol.DELEMETER
+				+ message + YongProtocol.DELEMETER + maxRoomCnt);
 	}
-	
-	//여기서 최초 연결 호출
+
+	// 여기서 최초 연결 호출
 	public void connect() {
 		nickName = joinPanel.nickNameTF.getText();
 		try {
@@ -152,14 +174,15 @@ public class YongMainFrame extends Frame {
 			return;
 		}
 		joinPanel.nickNameTF.setText("");
-		chatClient.sendMessage(YongProtocol.MULTI_CHAT + YongProtocol.DELEMETER + nickName + YongProtocol.DELEMETER + message);
+		chatClient.sendMessage(
+				YongProtocol.MULTI_CHAT + YongProtocol.DELEMETER + nickName + YongProtocol.DELEMETER + message);
 	}
 
 	/** getter and setter */
 	public void setYongChatClient(YongChatClient chatClient) {
 		this.chatClient = chatClient;
 	}
-	
+
 	public YongJoinPanel getJoinPanel() {
 		return joinPanel;
 	}
@@ -182,6 +205,10 @@ public class YongMainFrame extends Frame {
 
 	public void setWaitingPanel(YongWaitingPanel waitingPanel) {
 		this.waitingPanel = waitingPanel;
+	}
+
+	public String getNickName() {
+		return this.nickName;
 	}
 
 }
