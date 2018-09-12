@@ -28,6 +28,7 @@ public class YongChatClient {
 	private YongMainFrame mainFrame;
 	private YongRoomDialogFrame dialogFrame;
 	private String roomNumber;
+	private String invitingUser;
 	
 	public YongChatClient(YongMainFrame mainFrame) {
 		 this.mainFrame = mainFrame;
@@ -139,13 +140,14 @@ public class YongChatClient {
 				System.out.println("ROOMIN!!!:" + roomNumber);
 				mainFrame.appendMessage("###"+nickName+"님이 입장하셨습니다.###");
 				break;
-				
+			/**멀티채팅 메시지를 보낸 후 받을 때 이벤트 처리 */
 			case YongProtocol.MULTI_CHAT:
 				String chatMessage = tokens[3];
 				System.out.println("MULTI_CHAT"+chatMessage);
 				mainFrame.appendMessage("["+nickName+"]: " + chatMessage);
 				break;
 				
+			/**방정보 메시지를 보낸 후 받을 때 이벤트 처리 */
 			case YongProtocol.ROOMNUMBER:
 				mainFrame.setRoomNumber(tokens[2]);
 				System.out.println("roomNumber:"+tokens[2]);
@@ -157,26 +159,30 @@ public class YongChatClient {
 				mainFrame.appendMessage("["+tokens[1]+">>"+tokens[2]+"]: " + secretMessage);
 				break;
 				
-//			case YongProtocol.GUEST_LIST:
-//				mainFrame.userList.removeAll();
-//				for(int i = 1; i < tokens.length; i++) {
-//					mainFrame.userList.add(tokens[i]);
-//				}
-//				break;
+			case YongProtocol.INVITE:
+				invitingUser = tokens[1];
+				mainFrame.setRoomNumber(tokens[2]);
+				mainFrame.showInviteDialog("초대에 응하시겠습니까?");
+				break;
+				
+			case YongProtocol.INVITE_REJECT:
+				JOptionPane.showMessageDialog(mainFrame, tokens[3]);
+				break;
 
 			case YongProtocol.DISCONNECT:
 				mainFrame.getWaitingPanel().participateList.add("###"+nickName+"님이 퇴장###");
 				//끊어질때 기능 구현
 				
 			case YongProtocol.UPDATELIST:
+				mainFrame.getChatPanel().waitUserList.removeAll();
 				mainFrame.getWaitingPanel().waitingList.removeAll();
 				for(int i = 2; i < tokens.length; i++) {
 					if(mainFrame.getNickName().equals(tokens[i])){
 						tokens[i] += "(나)";
-					}
+					} 
 					mainFrame.getWaitingPanel().waitingList.add(tokens[i]);
+					mainFrame.getChatPanel().waitUserList.add(tokens[i]);
 				}
-//			
 				break;
 //			default:
 //				break;
@@ -188,7 +194,13 @@ public class YongChatClient {
 		return this.roomNumber; 
 	}
 	
+	public String getInvitingUser(){
+		return this.invitingUser;
+	}
+	
 	public void setDialogFrame(YongRoomDialogFrame dialogFrame){
 		this.dialogFrame = dialogFrame;
 	}
+	
+	
 }

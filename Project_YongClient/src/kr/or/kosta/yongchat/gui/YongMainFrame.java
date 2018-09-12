@@ -132,6 +132,9 @@ public class YongMainFrame extends Frame {
 		}
 
 	}
+	/**
+	 * 나중에 메서드 합칠 수 있는 부분
+	 */
 	/** multi chat send method (다중채팅할때 사용하는 메서드) */ 
 	public void sendMessage() {
 		String message = chatPanel.sendTF.getText();
@@ -153,8 +156,35 @@ public class YongMainFrame extends Frame {
 				+ YongProtocol.DELEMETER + roomNumber +YongProtocol.DELEMETER+ selectItem
 				+ YongProtocol.DELEMETER + message);
 	}
-	
+	/** 대기자룸에 있는 유저에게 초대메시지 보내기 */
+	public void inviteMessage(){
+		String invitedUser = chatPanel.waitUserList.getSelectedItem();
+		if (invitedUser == null || invitedUser.trim().length() == 0) {
+			return;
+		}
+		chatClient.sendMessage(YongProtocol.INVITE + YongProtocol.DELEMETER + nickName 
+				+ YongProtocol.DELEMETER + roomNumber +YongProtocol.DELEMETER + invitedUser);
+	}
 
+	/** 초대 다이얼로그 */
+	public void showInviteDialog(String message){
+		int result = JOptionPane.showConfirmDialog(this, message,"확인",JOptionPane.YES_NO_OPTION);
+		//사용자가 예, 아니오 없이 창을 닫은 경우
+		if(result == JOptionPane.CLOSED_OPTION){
+			chatClient.sendMessage(YongProtocol.INVITE_REJECT + YongProtocol.DELEMETER + nickName 
+					+ YongProtocol.DELEMETER + roomNumber + YongProtocol.DELEMETER + chatClient.getInvitingUser());
+			//사용자가 예 버튼을 누른경우
+		} else if(result == JOptionPane.YES_OPTION){
+			chatClient.sendMessage(YongProtocol.ROOMIN + YongProtocol.DELEMETER + nickName 
+					+ YongProtocol.DELEMETER + roomNumber);
+			changeCard("CHAT");
+			//아니오 버튼을 누른경우
+		} else {
+			chatClient.sendMessage(YongProtocol.INVITE_REJECT + YongProtocol.DELEMETER + nickName 
+					+ YongProtocol.DELEMETER + roomNumber + YongProtocol.DELEMETER + chatClient.getInvitingUser());
+		}
+		
+	}
 	/** 이벤트 등록 메서드 */
 	public void eventRegist() {
 		addWindowListener(new WindowAdapter() {
@@ -181,7 +211,8 @@ public class YongMainFrame extends Frame {
 				changeCard("CHAT");
 			}
 		});
-
+		
+		/** 방입장 버튼을 눌렀을 때 서버로 메시지 송신 */
 		waitingPanel.enterB.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -212,6 +243,14 @@ public class YongMainFrame extends Frame {
 					sendMessage();	
 				}
 				
+			}
+		});
+		
+		/** 대기방에 있는 유저 초대하기 */
+		chatPanel.inviteB.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				inviteMessage();
 			}
 		});
 

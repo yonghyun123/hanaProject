@@ -94,14 +94,12 @@ public class YongClient extends Thread {
                   + "FAIL");
 
          } else {
-
             chatServer.addClient(this);
             System.out.println("[Debug] : 접속 클라이언트 수 : " + chatServer.getClientCount());
             sendMessage(YongProtocol.CONNECT_RESULT + YongProtocol.DELEMETER + nickName + YongProtocol.DELEMETER
                   + "SUCCESS");
             chatServer.sendAllMessage(YongProtocol.UPDATELIST + YongProtocol.DELEMETER + nickName);
             chatServer.sendAllRoom(YongProtocol.ROOMLIST + YongProtocol.DELEMETER + nickName);
-
          }
          break;
 
@@ -138,6 +136,19 @@ public class YongClient extends Thread {
 
          sendMessage(YongProtocol.SECRET_CHAT + YongProtocol.DELEMETER + nickName + YongProtocol.DELEMETER + receiver
                + YongProtocol.DELEMETER + text);
+         break;
+
+      case YongProtocol.INVITE:
+         roomNumber = Integer.parseInt(tokens[2]);
+         String invited = tokens[3];
+         chatServer.sendInvitedClient(roomNumber, nickName, invited);
+         break;
+
+      case YongProtocol.INVITE_REJECT:
+         roomNumber = Integer.parseInt(tokens[2]);
+         receiver = tokens[3];
+         text = nickName + "님께서 초대를 거절하셨습니다.";
+         chatServer.sendRejectMessage(roomNumber, nickName, receiver, text);
          break;
 
       default:
