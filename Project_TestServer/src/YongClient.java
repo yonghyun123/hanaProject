@@ -82,6 +82,7 @@ public class YongClient extends Thread {
     */
    public void process(String message) {
       String[] tokens = message.split(YongProtocol.DELEMETER);
+
       int protocol = Integer.parseInt(tokens[0]);
       nickName = tokens[1];
 
@@ -105,22 +106,40 @@ public class YongClient extends Thread {
          break;
 
       case YongProtocol.MULTI_CHAT:
-         chatServer.sendAllMessage(message);
+         System.out.println("너 여기도 안들어오지?");
+         chatServer.sendAllMessageTest(message);
          break;
 
-      case YongProtocol.DISCONNECT:
-         chatServer.removeClient(this);
-         chatServer.sendAllMessage(message);
-         setRunning(false);
-         break;
+      // case YongProtocol.DISCONNECT:
+      // chatServer.removeClient(this);
+      // chatServer.sendAllMessage(message);
+      // setRunning(false);
+      // break;
 
       case YongProtocol.CREATE:
          chatServer.addRoom(message);
-         chatServer.sendAllMessage(message);
+         sendMessage(message);
          chatServer.sendAllRoom(YongProtocol.ROOMLIST + YongProtocol.DELEMETER + nickName);
+         chatServer.sendAllMessage(YongProtocol.UPDATELIST + YongProtocol.DELEMETER + nickName);
          break;
 
- 
+      case YongProtocol.ROOMIN:
+         int roomNumber = Integer.parseInt(tokens[2]);
+         chatServer.addParticipate(roomNumber, nickName);
+         chatServer.sendParticipate(roomNumber, message);
+         chatServer.sendAllMessage(YongProtocol.UPDATELIST + YongProtocol.DELEMETER + nickName);
+         break;
+
+      case YongProtocol.SECRET_CHAT:
+         roomNumber = Integer.parseInt(tokens[2]);
+         String receiver = tokens[3];
+         String text = tokens[4];
+         chatServer.sendOneClient(roomNumber, nickName, receiver, text);
+
+         sendMessage(YongProtocol.SECRET_CHAT + YongProtocol.DELEMETER + nickName + YongProtocol.DELEMETER + receiver
+               + YongProtocol.DELEMETER + text);
+         break;
+
       default:
          break;
       }

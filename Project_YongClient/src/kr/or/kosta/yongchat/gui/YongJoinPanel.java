@@ -71,13 +71,17 @@ public class YongJoinPanel extends Panel{
 	
 	public void eventRegist(){
 		joinB.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				mainFrame.connect();
+				
+			}
+		});
+		nickNameTF.addActionListener(new ActionListener() {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				System.out.println("ddd");
 				mainFrame.connect();
-				
-				
 			}
 		});
 	}

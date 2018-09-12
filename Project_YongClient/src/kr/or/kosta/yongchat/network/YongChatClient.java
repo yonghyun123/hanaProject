@@ -27,7 +27,6 @@ public class YongChatClient {
 	private boolean running;
 	private YongMainFrame mainFrame;
 	private YongRoomDialogFrame dialogFrame;
-	
 	private String roomNumber;
 	
 	public YongChatClient(YongMainFrame mainFrame) {
@@ -104,30 +103,60 @@ public class YongChatClient {
 				}  
 				break;
 				
+			/** 방목록이 생성될때마다 대기실에 있는 유저목록 최신화 프로토콜 */
 			case YongProtocol.ROOMLIST:
+				
 				mainFrame.getWaitingPanel().roomList.removeAll();
 				for(int i = 2; i < tokens.length; i++){
 					roomNumber = tokens[2];
+					System.out.println("ROOMLIST!!!:" + roomNumber);
 					mainFrame.getWaitingPanel().roomList.add(tokens[i]);
 				}
 				break;
+				
+			/** 방을 처음으로 생성할때 클라이언트가 받는 메시지 */
 			case YongProtocol.CREATE:
 				mainFrame.appendMessage("###"+nickName+"님이 입장하셨습니다.###");
-				mainFrame.getChatPanel().inUserList.add(nickName);
+				System.out.println("nickName!!!!!!!1"+nickName);
+				mainFrame.getChatPanel().inUserList.add(nickName+"(나)");
 				break;
+				
+			/** 방안으로 들어가서 클라이언트가 받는 메시지 */
 			case YongProtocol.ROOMIN:
 				mainFrame.getChatPanel().inUserList.removeAll();
+				mainFrame.getChatPanel().choice.removeAll();
+				mainFrame.getChatPanel().choice.add("전체");
+				
+				mainFrame.getChatPanel().messageTA.setText("");
 				for(int i = 3; i < tokens.length; i++){
-					System.out.println("roomIn" + tokens[i]);
+					if(mainFrame.getNickName().equals(tokens[i])){
+						tokens[i] += "(나)";
+					} else{
+						mainFrame.getChatPanel().choice.add(tokens[i]);
+					}
 					mainFrame.getChatPanel().inUserList.add(tokens[i]);
 				}
+				System.out.println("ROOMIN!!!:" + roomNumber);
 				mainFrame.appendMessage("###"+nickName+"님이 입장하셨습니다.###");
 				break;
 				
-//			case YongProtocol.MULTI_CHAT:
-//				String chatMessage = tokens[2];
-//				mainFrame.appendMessage("["+nickName+"]: " + chatMessage);
-//				break;
+			case YongProtocol.MULTI_CHAT:
+				String chatMessage = tokens[3];
+				System.out.println("MULTI_CHAT"+chatMessage);
+				mainFrame.appendMessage("["+nickName+"]: " + chatMessage);
+				break;
+				
+			case YongProtocol.ROOMNUMBER:
+				mainFrame.setRoomNumber(tokens[2]);
+				System.out.println("roomNumber:"+tokens[2]);
+				break;
+				
+			case YongProtocol.SECRET_CHAT:
+				String secretMessage = tokens[3];
+				System.out.println("SECRET CHAT"+secretMessage);
+				mainFrame.appendMessage("["+tokens[1]+">>"+tokens[2]+"]: " + secretMessage);
+				break;
+				
 //			case YongProtocol.GUEST_LIST:
 //				mainFrame.userList.removeAll();
 //				for(int i = 1; i < tokens.length; i++) {
@@ -152,6 +181,11 @@ public class YongChatClient {
 //			default:
 //				break;
 		}
+	}
+	//getter and setter
+	
+	public String getRoomNumber(){
+		return this.roomNumber; 
 	}
 	
 	public void setDialogFrame(YongRoomDialogFrame dialogFrame){
