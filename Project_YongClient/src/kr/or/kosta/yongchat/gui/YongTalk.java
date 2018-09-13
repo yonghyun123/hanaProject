@@ -7,7 +7,7 @@ public class YongTalk {
 		
 		YongMainFrame mainFrame = new YongMainFrame("YongTalk");
 		YongChatClient chatClient = new YongChatClient(mainFrame);
-		
+	
 		mainFrame.setYongChatClient(chatClient);
 		mainFrame.init();
 	}

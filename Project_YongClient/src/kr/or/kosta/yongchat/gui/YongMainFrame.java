@@ -7,6 +7,8 @@ import java.awt.Panel;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
@@ -37,6 +39,10 @@ public class YongMainFrame extends Frame {
 	private YongChatClient chatClient;
 	private YongRoomDialogFrame dialogFrame;
 	private String roomNumber;
+	
+	private String findRoomNumber;
+	private String curUserCnt;
+	private String maxCnt;
 
 	public YongMainFrame() {
 
@@ -86,6 +92,7 @@ public class YongMainFrame extends Frame {
 
 	public void finish() {
 		chatClient.sendMessage(YongProtocol.DISCONNECT + YongProtocol.DELEMETER + nickName);
+		System.out.println();
 		chatClient.stopClient();
 		setVisible(false);
 		dispose();
@@ -98,29 +105,54 @@ public class YongMainFrame extends Frame {
 		chatPanel.messageTA.append(message + "\n");
 	}
 
-	// 클라이언트가 방을 입장 할 때.
-	public void enteredRoom() {
+	/** 방입장시 서버로 메시지 보내기 */
+	public void enteredRoomMessage() {
+		//입장시 textArea 초기화
+		chatPanel.messageTA.setText("");
 		String parseStr = waitingPanel.roomList.getSelectedItem();
-		String[] tokens = parseStr.split("\\s+");
-		System.out.println("roomNumber" + tokens[1]);
-		roomNumber = tokens[1];
-		chatClient.sendMessage(YongProtocol.ROOMIN + YongProtocol.DELEMETER + nickName + YongProtocol.DELEMETER + tokens[1]);
+		if(parseStr == null || parseStr.trim().length() == 0){
+			return;
+		}
+		if(Integer.parseInt(curUserCnt) < Integer.parseInt(maxCnt)){
+			String[] tokens = parseStr.split("\\s+");
+			System.out.println("roomNumber" + tokens[0]);
+			roomNumber = tokens[0];
+			chatClient.sendMessage(YongProtocol.ROOMIN + YongProtocol.DELEMETER + nickName + YongProtocol.DELEMETER + roomNumber);
+			changeCard("CHAT");
+		}
+		else {
+			JOptionPane.showMessageDialog(this, "최대인원을 초과했습니다.");
+			return;
+		}
 	}
 
 	// 방만들기 버튼 눌렀을때 -> 방 텍스트 + choice + 닉네임 보내기
 	public void sendRoomInfo() {
+		//입장시 textArea 초기화
+		chatPanel.messageTA.setText("");
 		String message = dialogFrame.roomDialog.roomNameTF.getText();
+		
 		String maxRoomCnt = dialogFrame.roomDialog.numberC.getSelectedItem();
 		if (message == null || message.trim().length() == 0) {
 			return;
 		}
+		if(message.contains(" ")){
+			JOptionPane.showMessageDialog(this, "방제목에 공백을 포함할 수 없습니다");
+			return;
+		}
 		chatClient.sendMessage(YongProtocol.CREATE + YongProtocol.DELEMETER + nickName + YongProtocol.DELEMETER
 				+ message + YongProtocol.DELEMETER + maxRoomCnt);
+		changeCard("CHAT");
 	}
 
 	// 여기서 최초 연결 호출
 	public void connect() {
 		nickName = joinPanel.nickNameTF.getText();
+		//여기도 코드 수정 필요
+		if(nickName.contains(" ")){
+			JOptionPane.showMessageDialog(this, "닉네임에 공백을 포함할 수 없습니다");
+			return;
+		}
 		try {
 			chatClient.connectServer();
 			// 최초 연결 메시지 전송
@@ -145,7 +177,7 @@ public class YongMainFrame extends Frame {
 		chatClient.sendMessage(YongProtocol.MULTI_CHAT + YongProtocol.DELEMETER + nickName 
 				+ YongProtocol.DELEMETER + roomNumber +YongProtocol.DELEMETER + message);
 	}
-	
+	/**1:1 채팅 기능으로 서버에게 메시지 요청 */
 	public void secretSendMessage(String selectItem){
 		String message = chatPanel.sendTF.getText();
 		if (message == null || message.trim().length() == 0) {
@@ -165,7 +197,17 @@ public class YongMainFrame extends Frame {
 		chatClient.sendMessage(YongProtocol.INVITE + YongProtocol.DELEMETER + nickName 
 				+ YongProtocol.DELEMETER + roomNumber +YongProtocol.DELEMETER + invitedUser);
 	}
-
+	
+	/** 채팅룸에서 나갈때 서버에게 메시지 보내기 */
+	public void exitMessage(){
+		chatClient.sendMessage(YongProtocol.BACK + YongProtocol.DELEMETER + nickName 
+				+ YongProtocol.DELEMETER + roomNumber);
+	}
+	
+	public void leaderExitedMessage(){
+		changeCard("LOBBY");
+	}
+	
 	/** 초대 다이얼로그 */
 	public void showInviteDialog(String message){
 		int result = JOptionPane.showConfirmDialog(this, message,"확인",JOptionPane.YES_NO_OPTION);
@@ -178,6 +220,7 @@ public class YongMainFrame extends Frame {
 			chatClient.sendMessage(YongProtocol.ROOMIN + YongProtocol.DELEMETER + nickName 
 					+ YongProtocol.DELEMETER + roomNumber);
 			changeCard("CHAT");
+			chatPanel.messageTA.setText("");
 			//아니오 버튼을 누른경우
 		} else {
 			chatClient.sendMessage(YongProtocol.INVITE_REJECT + YongProtocol.DELEMETER + nickName 
@@ -185,6 +228,38 @@ public class YongMainFrame extends Frame {
 		}
 		
 	}
+	
+	/** 방이 선택되었을때 최대 인원을 보내는 메서드 */
+	public String selectedMaxCnt(){
+		String parseStr = waitingPanel.roomList.getSelectedItem();
+		String[] tokens = parseStr.split("\\s+");
+		return tokens[3];
+	}
+	
+	/** 룸리스트에서 방이 선택됬을때 서버에게 보내는 메서드 */
+	public void selectedItemMessage(){
+		String parseStr = waitingPanel.roomList.getSelectedItem();
+		String[] tokens = parseStr.split("\\s+");
+		for(int i = 0; i < tokens.length; i++){
+			System.out.println("tokens!!!!!!!!!!!"+tokens[i]);
+		}
+		chatClient.sendMessage(YongProtocol.SELECT_ROOM + YongProtocol.DELEMETER + nickName 
+				+ YongProtocol.DELEMETER + Integer.parseInt(tokens[0]));
+	}
+	
+	/** 방검색 메서드 */
+	public void searchRoomName(){
+		
+		/************************************************************/
+		String roomName = waitingPanel.roomSearchTF.getText().trim();
+//		if (roomName == null || roomName.trim().length() == 0) {
+//			return;
+//		}
+		chatClient.sendMessage(YongProtocol.SEARCH_ROOM + YongProtocol.DELEMETER + nickName 
+				+ YongProtocol.DELEMETER + roomName);
+		
+	}
+	
 	/** 이벤트 등록 메서드 */
 	public void eventRegist() {
 		addWindowListener(new WindowAdapter() {
@@ -201,14 +276,15 @@ public class YongMainFrame extends Frame {
 				dialogFrame.init();
 			}
 		});
-
-		// 방 생성 다이어로그 정보 서버로 보내기
+		
+	
+		/** 방생성 버튼을 눌렀을 때 서버로 메시지 송신 */
 		dialogFrame.roomDialog.createB.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				sendRoomInfo();
 				dialogFrame.finish();
-				changeCard("CHAT");
+				
 			}
 		});
 		
@@ -216,7 +292,15 @@ public class YongMainFrame extends Frame {
 		waitingPanel.enterB.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				enteredRoom();
+				String roomInfo = waitingPanel.roomList.getSelectedItem();
+				String[] tokens = roomInfo.split("\\s+");
+				for(int i = 0; i < tokens.length; i++){
+					System.out.println("###tokes: "+tokens[i]);
+					System.out.println("###현재인원: " + getCurUserCnt());
+					System.out.println("###방번호: " + getFindRoomNumber());
+				}
+				enteredRoomMessage();
+				
 			}
 		});
 		
@@ -253,7 +337,40 @@ public class YongMainFrame extends Frame {
 				inviteMessage();
 			}
 		});
-
+		
+		/** 채팅방에 있는 유저 대기룸으로 back btn */
+		chatPanel.exitB.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				exitMessage();
+				changeCard("LOBBY");
+			}
+		});
+		
+		/** 대기방에 있는 방목록을 눌렀을 시 데이터 전송 */
+		waitingPanel.roomList.addItemListener(new ItemListener() {
+			@Override
+			public void itemStateChanged(ItemEvent e) {
+				if(e.getStateChange() == ItemEvent.SELECTED){
+					selectedItemMessage();
+				}
+			}
+		});
+		
+		/** 방검색 버튼이벤트 */
+		waitingPanel.roomSearchTF.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				searchRoomName();
+			}
+		});
+		waitingPanel.roomSearchB.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				searchRoomName();
+			}
+		});
+		
 	}
 
 	/** getter and setter */
@@ -293,4 +410,21 @@ public class YongMainFrame extends Frame {
 		this.roomNumber = roomNumber;
 	}
 
+	public void setFindRoomNumber(String findRoomNumber){
+		this.findRoomNumber = findRoomNumber;
+	}
+	public String getFindRoomNumber(){
+		return this.findRoomNumber;
+	}
+	
+	public void setCurUserCnt(String curUserCnt){
+		this.curUserCnt = curUserCnt;
+	}
+	public String getCurUserCnt(){
+		return this.curUserCnt;
+	}
+	
+	public void setMaxCnt(String maxCnt){
+		this.maxCnt = maxCnt;
+	}
 }

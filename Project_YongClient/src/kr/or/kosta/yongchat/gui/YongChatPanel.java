@@ -3,7 +3,7 @@ package kr.or.kosta.yongchat.gui;
 import java.awt.Button;
 import java.awt.Choice;
 import java.awt.Component;
-import java.awt.Frame;
+import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Image;
@@ -13,6 +13,7 @@ import java.awt.List;
 import java.awt.Panel;
 import java.awt.TextArea;
 import java.awt.TextField;
+import java.awt.Toolkit;
 
 public class YongChatPanel extends Panel {
 
@@ -24,14 +25,14 @@ public class YongChatPanel extends Panel {
 	GridBagConstraints gridBagConstraints;
 
 	// property
-	public Button waitUserB, inviteB, sendB;
+	public Button exitB, inviteB, sendB;
 	public Choice choice;
 	public TextArea messageTA;
 	public List inUserList, waitUserList;
 	public TextField sendTF;
 	public Label inUserL;
 
-	Image background;
+	Image yongRight;
 
 	public YongChatPanel(YongMainFrame mainFrame) {
 		this.mainFrame = mainFrame;
@@ -44,9 +45,11 @@ public class YongChatPanel extends Panel {
 		waitUserList = new List();
 		sendTF = new TextField(1);
 		inUserL = new Label("참여자");
-		waitUserB = new Button("대기방유저");
+		exitB = new Button("나가기");
 		gridBagLayout = new GridBagLayout();
 		gridBagConstraints = new GridBagConstraints();
+		
+	    yongRight = Toolkit.getDefaultToolkit().getImage("bin/resources/yong_right.png");
 
 	}
 
@@ -59,8 +62,8 @@ public class YongChatPanel extends Panel {
 		setLayout(gridBagLayout);
 
 		add(messageTA, 0, 0, 2, 4, 2, 1);
-		add(waitUserB, 2, 0, 1, 1, 0, 0);
-		add(inviteB, 3, 0, 1, 1, 0, 0);
+		add(inviteB, 2, 0, 1, 1, 0, 0);
+		add(exitB, 3, 0, 1, 1, 0, 0);
 
 		add(waitUserList, 2, 1, 2, 1, 0, 1);
 
@@ -106,6 +109,11 @@ public class YongChatPanel extends Panel {
 		gridBagLayout.setConstraints(component, gridBagConstraints);
 		add(component);
 	}
+	
+	@Override
+    public void paint(Graphics g) {
+       g.drawImage(yongRight,450 , 0,20,20, this);
+    }
 
 	public void eventRegist() {
 

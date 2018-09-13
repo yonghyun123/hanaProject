@@ -11,5 +11,4 @@ public class YongBTS {
 			System.out.println(e.getMessage());
 		}
 	}
-
 }

@@ -17,7 +17,7 @@ import kr.or.kosta.yongchat.gui.dialog.YongRoomDialogFrame;
 public class YongChatClient {
 	// 192.168.0.121
 	// localhost
-	public static final String SERVER = "192.168.0.121";
+	public static final String SERVER = "localhost";
 	public static final int PORT = 7777;
 	
 	private Socket socket;
@@ -27,7 +27,6 @@ public class YongChatClient {
 	private boolean running;
 	private YongMainFrame mainFrame;
 	private YongRoomDialogFrame dialogFrame;
-	private String roomNumber;
 	private String invitingUser;
 	
 	public YongChatClient(YongMainFrame mainFrame) {
@@ -106,30 +105,30 @@ public class YongChatClient {
 				
 			/** 방목록이 생성될때마다 대기실에 있는 유저목록 최신화 프로토콜 */
 			case YongProtocol.ROOMLIST:
-				
+				//RoomList protocol로 들어올시 들어오는 데이터 포맷은
+				//String.format을 이용한 포맷팅 
 				mainFrame.getWaitingPanel().roomList.removeAll();
 				for(int i = 2; i < tokens.length; i++){
-					roomNumber = tokens[2];
-					System.out.println("ROOMLIST!!!:" + roomNumber);
+					System.out.println("ROOMLIST!!!:" + tokens[i]);
 					mainFrame.getWaitingPanel().roomList.add(tokens[i]);
 				}
+//				mainFrame.getWaitingPanel().roomList.add(tokens[2]);
 				break;
 				
 			/** 방을 처음으로 생성할때 클라이언트가 받는 메시지 */
 			case YongProtocol.CREATE:
 				mainFrame.appendMessage("###"+nickName+"님이 입장하셨습니다.###");
 				System.out.println("nickName!!!!!!!1"+nickName);
-				mainFrame.getChatPanel().inUserList.add(nickName+"(나)");
+				mainFrame.getChatPanel().inUserList.add(nickName+"(방장)");
 				break;
 				
-			/** 방안으로 들어가서 클라이언트가 받는 메시지 */
-			case YongProtocol.ROOMIN:
+			/**방에 있는 유저 최신화 */
+			case YongProtocol.UPDATE_INLIST:
 				mainFrame.getChatPanel().inUserList.removeAll();
 				mainFrame.getChatPanel().choice.removeAll();
 				mainFrame.getChatPanel().choice.add("전체");
 				
-				mainFrame.getChatPanel().messageTA.setText("");
-				for(int i = 3; i < tokens.length; i++){
+				for(int i = 2; i < tokens.length; i++){
 					if(mainFrame.getNickName().equals(tokens[i])){
 						tokens[i] += "(나)";
 					} else{
@@ -137,14 +136,30 @@ public class YongChatClient {
 					}
 					mainFrame.getChatPanel().inUserList.add(tokens[i]);
 				}
-				System.out.println("ROOMIN!!!:" + roomNumber);
+				
+				break;
+				
+			/** 방안으로 들어가서 클라이언트가 받는 메시지 */
+			case YongProtocol.ROOMIN:
 				mainFrame.appendMessage("###"+nickName+"님이 입장하셨습니다.###");
 				break;
+				
+			/** 유저가 채팅룸에서 나갈때 받는 메시지 */
+			case YongProtocol.BACK:
+				mainFrame.appendMessage("###"+nickName+"님이 퇴장하셨습니다.###");
+				if(tokens.length == 4){
+					mainFrame.leaderExitedMessage();
+				} 
+				
+			break;
+			
 			/**멀티채팅 메시지를 보낸 후 받을 때 이벤트 처리 */
 			case YongProtocol.MULTI_CHAT:
 				String chatMessage = tokens[3];
-				System.out.println("MULTI_CHAT"+chatMessage);
-				mainFrame.appendMessage("["+nickName+"]: " + chatMessage);
+				String curTime = "("+tokens[4]+")";
+				System.out.println("MULTI_CHAT"+chatMessage + "\t" + curTime);
+				
+				mainFrame.appendMessage("["+nickName+"]: " + chatMessage +String.format("%10s", " ")+ curTime);
 				break;
 				
 			/**방정보 메시지를 보낸 후 받을 때 이벤트 처리 */
@@ -152,7 +167,8 @@ public class YongChatClient {
 				mainFrame.setRoomNumber(tokens[2]);
 				System.out.println("roomNumber:"+tokens[2]);
 				break;
-				
+			
+			/**대화방 안에 있는 개인 메시지 보낼때 처리 */
 			case YongProtocol.SECRET_CHAT:
 				String secretMessage = tokens[3];
 				System.out.println("SECRET CHAT"+secretMessage);
@@ -168,10 +184,47 @@ public class YongChatClient {
 			case YongProtocol.INVITE_REJECT:
 				JOptionPane.showMessageDialog(mainFrame, tokens[3]);
 				break;
+				
+			case YongProtocol.OUT:
+				mainFrame.getChatPanel().messageTA.setText("");
+				mainFrame.getChatPanel().inUserList.removeAll();
+				mainFrame.getChatPanel().waitUserList.removeAll();
+				JOptionPane.showMessageDialog(mainFrame, "방장이 나갔습니다");
+				break;
+				
+			/** 대기방에서 방을 선택했을 때 서버로부터 받는 데이터 */
+			case YongProtocol.SELECT_ROOM:
+				mainFrame.getWaitingPanel().participateList.removeAll();
+				String maxCnt = mainFrame.selectedMaxCnt();
+				String curCnt = tokens[3];
+				String curMaxCnt = "(" + curCnt +"/"+ maxCnt+ ")";
+				//밑으로 추가 위에서 현재인원 추가해줘야해
+				mainFrame.getWaitingPanel().participateList.add(curMaxCnt);
+				mainFrame.setCurUserCnt(curCnt);
+				mainFrame.setMaxCnt(maxCnt);
+				for(int i = 4; i < tokens.length; i++){
+					mainFrame.getWaitingPanel().participateList.add(tokens[i]);
+				}
+				break;
+				
+			case YongProtocol.SEARCH_ROOM:
+				//token[2]번부터 검색
+				mainFrame.getWaitingPanel().roomList.removeAll();
+				if(tokens.length > 2){
+					for(int i = 2; i < tokens.length; i++){
+						
+						System.out.println("roomListAppend:" + tokens[i]);
+						mainFrame.getWaitingPanel().roomList.add(tokens[i]);
+					}
+				} else {
+					
+				}
 
+				break;
 			case YongProtocol.DISCONNECT:
-				mainFrame.getWaitingPanel().participateList.add("###"+nickName+"님이 퇴장###");
-				//끊어질때 기능 구현
+//				끊어질때 기능 구현해야해
+				mainFrame.appendMessage("###"+tokens[1]+"님이 퇴장하셨습니다.###");
+				break;
 				
 			case YongProtocol.UPDATELIST:
 				mainFrame.getChatPanel().waitUserList.removeAll();
@@ -189,10 +242,6 @@ public class YongChatClient {
 		}
 	}
 	//getter and setter
-	
-	public String getRoomNumber(){
-		return this.roomNumber; 
-	}
 	
 	public String getInvitingUser(){
 		return this.invitingUser;

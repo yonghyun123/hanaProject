@@ -1,22 +1,18 @@
 package kr.or.kosta.yongchat.gui;
 
-import java.awt.BorderLayout;
 import java.awt.Button;
 import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Frame;
+import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Image;
 import java.awt.Insets;
 import java.awt.Label;
 import java.awt.List;
 import java.awt.Panel;
 import java.awt.TextField;
 import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
-import kr.or.kosta.yongchat.gui.dialog.YongRoomDialog;
 import kr.or.kosta.yongchat.gui.dialog.YongRoomDialogFrame;
 
 public class YongWaitingPanel extends Panel {
@@ -39,6 +35,7 @@ public class YongWaitingPanel extends Panel {
 
 	// Component
 	YongRoomDialogFrame dialogFrame;
+	Image yongRight;
 
 	public YongWaitingPanel(YongMainFrame mainFrame) {
 		this.mainFrame = mainFrame;
@@ -52,7 +49,7 @@ public class YongWaitingPanel extends Panel {
 		searchL = new Label("방제목");
 		waitingL = new Label("대기인원");
 		waitingL.setAlignment(Label.RIGHT);
-		participateL = new Label("참여인원");
+		participateL = new Label("선택된 방정보");
 		participateL.setAlignment(Label.RIGHT);
 
 		roomNumL = new Label("방번호");
@@ -65,8 +62,8 @@ public class YongWaitingPanel extends Panel {
 		waitingList = new List();
 		participateList = new List();
 
+	    yongRight = Toolkit.getDefaultToolkit().getImage("bin/resources/yong_right.png");
 		dialogFrame = new YongRoomDialogFrame();
-
 	}
 
 	public void init() {
@@ -119,15 +116,14 @@ public class YongWaitingPanel extends Panel {
 		gridBagLayout.setConstraints(component, gridBagConstraints);
 		add(component);
 	}
+	
+	@Override
+    public void paint(Graphics g) {
+       g.drawImage(yongRight,450 , 0,20,20, this);
+    }
 
 	public void eventRegist() {
-		// 입장 버튼 눌렸을때 이벤트
-		enterB.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				mainFrame.changeCard("CHAT");
-			}
-		});
+
 
 	}
 
